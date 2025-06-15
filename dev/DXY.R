@@ -27,7 +27,7 @@ tbl <- tbl %>% arrange(Date)
 tbl$ibov <- log(tbl$ibov)
 
 
-Moedas <- read_xlsx("./Database/Dados Teo.xlsx",
+Moedas <- read_xlsx("./Database/Economatica Moedas.xlsx",
                     sheet = 1,
                     range = cell_limits(ul = c(6, 2), lr = c(NA, NA)),
                     col_names = c("Data", "DXY", "USDCAD", "USDEUR", "USDJPY",
