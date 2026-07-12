@@ -138,8 +138,8 @@ for (i in seq_along(database)) {
     
     db <- db %>%
       mutate_all(.funs = detrend)
-      # mutate_all(.funs = Delta)
-  
+    # mutate_all(.funs = Delta)
+    
     
     index.PCA <- which(!is.na(db[[1]]))
   }

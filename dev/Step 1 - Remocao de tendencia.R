@@ -17,9 +17,9 @@ rm(list=setdiff(ls(), c("date.ini", "date.fim")))
 # Arquivo que vai guardar os pesos.
 wights.filepath <- file.path("database", "ICF_Weights.rds")
 PCA.rotation.fileMask <- file.path("database", "PCA_%d_rotation.rds")
- <- <- 
-
-source("./lib/function pDiff.r")
+<- <- 
+  
+  source("./lib/function pDiff.r")
 
 # Define a Monthly table ----------------------------------------------------
 cat(sprintf("Entre com a data inicial e data final para a analise dos pesos e decomposição dos PCAs\n"))
@@ -100,10 +100,10 @@ for (db.idx in seq_len(7)) {
          path = "Graficos",
          plot = g,
          scale=1, units = "in", dpi = 300, width = 10.4, height = 5.85)
-
+  
   
   cat(sprintf("Excluindo dados faltantes para calculo do PCA do %s", db.name))
   size.preExclusion <- nrow(tbl)
   tbl <- tbl %>% na.omit() 
   cat(sprintf("\t(Total de exclusões: %d)\n", size.preExclusion-nrow(tbl)))
-   <- %>% <- 
+  <- %>% <- 

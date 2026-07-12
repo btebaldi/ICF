@@ -3,8 +3,8 @@ import datetime
 
 if __name__ == "__main__":
 
-    obj = SwapDiProcessor.SwapDiProcessor(start_date = datetime.date(2020, 1, 1),
-                                          end_date = datetime.date(2023, 8, 7),
+    obj = SwapDiProcessor.SwapDiProcessor(start_date = datetime.date.today() - datetime.timedelta(days=365),
+                                          end_date = datetime.date.today(),
                                           verbose_level=1)
     while True:
         print("\nSelect an action:")

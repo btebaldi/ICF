@@ -10,7 +10,7 @@
 #' @export 
 #'
 #' @examples Testa.RaizUnitaria(data, c("col1", "col2"))
-#'
+browser()
 Testa.RaizUnitaria <- function(dados,
                                colunas=NULL,
                                critical = c("5pct", "1pct", "10pct"),
