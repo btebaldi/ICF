@@ -1,0 +1,6 @@
+Using function: d.ln
+Importance of components:
+                          PC1    PC2    PC3
+Standard deviation     1.3933 0.7704 0.6821
+Proportion of Variance 0.6471 0.1978 0.1551
+Cumulative Proportion  0.6471 0.8449 1.0000

@@ -1,0 +1,6 @@
+Using function: IdentityFunction
+Importance of components:
+                          PC1    PC2
+Standard deviation     1.0239 0.9755
+Proportion of Variance 0.5242 0.4758
+Cumulative Proportion  0.5242 1.0000

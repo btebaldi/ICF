@@ -3,7 +3,7 @@
 # Autor: Bruno Tebaldi Barbosa
 #
 # Data: 2021-05-20
-# Revisao: 2025-06-12
+# Revisao: 2025-11-15
 
 # Setup -------------------------------------------------------------------
 # Cleans up the workspace to avoid conflicts from old variables
@@ -15,6 +15,7 @@ library(readxl)
 
 # User defined functions --------------------------------------------------
 
+# script to check the unit root on every series
 source("./Scripts/CheckUnitRoot.R")
 
 
@@ -26,6 +27,12 @@ d.nn <- function(x, n.lag = 1){
   return( x - dplyr::lag(x, n = n.lag) )
 }
 
+IdentityFunction <- function(c){
+  return(c)
+  }
+  
+
+source("./Scripts/Utils.R")
 # Data Load ---------------------------------------------------------------
 
 tbl <- readxl::read_xlsx(path = "./Database/FCI Selected Data.xlsx")
@@ -33,11 +40,14 @@ tbl <- readxl::read_xlsx(path = "./Database/FCI Selected Data.xlsx")
 tbl$Date <-  as.Date(tbl$Date)
 
 
+
+# Data table summary (before any transformation) --------------------------
+
+df_summary(tbl) |> writexl::write_xlsx(path = "./Output/Descriptive Statistics.xlsx")
+
 # Group setup -------------------------------------------------------------
 
 # Lista tem a realcao de qual variavel esta em cada grupo.
-
-
 m_groups <- list( 
   # Produto = c("IBCBR", "PIM"),
   Juros_exterior = c(
@@ -98,12 +108,17 @@ tbl <- tbl |> dplyr::select(Date, unlist(m_groups, use.names = FALSE)) |> na.omi
 
 # Function ----------------------------------------------------------------
 
-Extrair_PCA <- function(tbl, func = NULL){
+Extrair_PCA <- function(tbl, 
+                        func,
+                        writeToFile = TRUE, 
+                        name = "myFile"){
   
-  # if no function is passed we adopt the Identity function
-  if(is.null(func)) {
-    func = function(c){return(c)}
-  }
+  out_path <- file.path("Output", sprintf("Summary_PCA_%s.txt", name))
+  
+  line <- sprintf("Using function: %s", deparse(substitute(func)))
+  readr::write_lines(x = line,
+                     file = out_path,
+                     append = FALSE)
   
   tbl.aux <- tbl |> 
     mutate_if(.predicate = is.numeric, .funs = func) |> 
@@ -116,11 +131,26 @@ Extrair_PCA <- function(tbl, func = NULL){
     facet_wrap(~name)
   
   print(g1)
+  if(writeToFile){
+    ggsave(filename = file.path("Output", sprintf("%s.png",name) ),
+           plot = g1,
+           width = 16,
+           height = 9,
+           dpi = 100, scale = 1)
+  }
   
   pca.aux <- tbl.aux |>
     dplyr::select(-Date )  |>
     prcomp(center = TRUE, scale. = TRUE)
   
+  if(writeToFile){
+    pca.aux |>
+      summary() |>
+      capture.output() |>
+      readr::write_lines(file = out_path,
+                         append = TRUE)
+    
+  }
   print(summary(pca.aux))
   
   tbl_return <- tbl.aux |>
@@ -137,7 +167,7 @@ Extrair_PCA <- function(tbl, func = NULL){
 
 tbl_PCA_JE <- tbl |> 
   dplyr::select(c("Date", all_of(m_groups$Juros_exterior))) |>
-  Extrair_PCA(func = NULL)
+  Extrair_PCA(func = IdentityFunction, writeToFile = TRUE, name = "Juros_exterior")
 
 tbl_PCA_JE <- tbl_PCA_JE |> rename(JE_PC1 = PC1)
 
@@ -145,7 +175,7 @@ tbl_PCA_JE <- tbl_PCA_JE |> rename(JE_PC1 = PC1)
 
 tbl_PCA_RK <- tbl %>% 
   dplyr::select(c(m_groups$Risco, "Date")) %>%
-  Extrair_PCA(func = NULL)
+  Extrair_PCA(func = IdentityFunction, writeToFile = TRUE, name = "Risco")
 
 tbl_PCA_RK <- tbl_PCA_RK |> rename(RK_PC1 = PC1)
 
@@ -154,7 +184,7 @@ tbl_PCA_RK <- tbl_PCA_RK |> rename(RK_PC1 = PC1)
 
 tbl_PCA_JB <- tbl |> 
   dplyr::select(c(m_groups$Juros_Brazil, "Date")) |> 
-  Extrair_PCA(func = NULL)
+  Extrair_PCA(func = IdentityFunction, writeToFile = TRUE, name = "Juros_Brazil")
 
 tbl_PCA_JB <- tbl_PCA_JB |> rename(JB_PC1 = PC1)
 
@@ -162,7 +192,7 @@ tbl_PCA_JB <- tbl_PCA_JB |> rename(JB_PC1 = PC1)
 
 tbl_PCA_CM <- tbl |> 
   dplyr::select(c(m_groups$Commoditires, "Date")) |> 
-  Extrair_PCA(func = d.ln)
+  Extrair_PCA(func = d.ln, writeToFile = TRUE, name = "Commodities")
 
 tbl_PCA_CM <- tbl_PCA_CM |> rename(CM_PC1 = PC1)
 
@@ -171,7 +201,7 @@ tbl_PCA_CM <- tbl_PCA_CM |> rename(CM_PC1 = PC1)
 
 tbl_PCA_MK <- tbl %>% 
   dplyr::select(c(m_groups$Mercado_capitais, "Date")) %>%
-  Extrair_PCA(func = d.ln)
+  Extrair_PCA(func = d.ln, writeToFile = TRUE, name = "Mercado_capitais")
 
 tbl_PCA_MK <- tbl_PCA_MK |> rename(MK_PC1 = PC1)
 
@@ -179,7 +209,7 @@ tbl_PCA_MK <- tbl_PCA_MK |> rename(MK_PC1 = PC1)
 
 tbl_PCA_MM <- tbl %>% 
   dplyr::select(c(m_groups$Moedas, "Date")) %>%
-  Extrair_PCA(func = d.ln)
+  Extrair_PCA(func = d.ln, writeToFile = TRUE, name = "Moedas")
 
 tbl_PCA_MM <- tbl_PCA_MM |> rename(MM_PC1 = PC1)
 
@@ -187,7 +217,7 @@ tbl_PCA_MM <- tbl_PCA_MM |> rename(MM_PC1 = PC1)
 
 tbl_PCA_OL <- tbl %>% 
   dplyr::select(c(m_groups$Petroleo, "Date")) %>%
-  Extrair_PCA(func = d.ln)
+  Extrair_PCA(func = d.ln, writeToFile = TRUE, name = "Petroleo")
 
 tbl_PCA_OL <- tbl_PCA_OL |> rename(OL_PC1 = PC1)
 
