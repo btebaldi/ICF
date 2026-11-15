@@ -5,6 +5,7 @@
 # Data: 2021-05-20
 # Revisao: 2025-06-12
 
+
 # Setup -------------------------------------------------------------------
 # Cleans up the workspace to avoid conflicts from old variables
 rm(list = ls())
@@ -24,15 +25,26 @@ arimaMdl <- forecast::auto.arima(y = tbl$IBCBR_SA, trace = TRUE, stepwise = FALS
 arimaMdl$residuals %>% forecast::Acf()
 
 model <- lm(IBCBR_SA ~ lag(IBCBR_SA, 1) +
-              lag(CM_PC1, 1) +
-              lag(JB_PC1, 1) +
-              lag(JE_PC1, 1) +
-              lag(MK_PC1, 1) +
-              lag(MM_PC1, 1) +
-              lag(OL_PC1, 1) +
-              lag(RK_PC1, 1) +
-              DUM_202004 + DUM_202003 + DUM_201805 + DUM_202302 + 
-              1, data = tbl)
+              lag(CM_PC1, 2) +
+              lag(JB_PC1, 2) +
+              lag(JE_PC1, 2) +
+              lag(MK_PC1, 2) +
+              lag(MM_PC1, 2) +
+              lag(OL_PC1, 2) +
+              lag(RK_PC1, 2) +
+              # DUM_200809 +
+              DUM_200810 +
+              # DUM_201108 +
+              # DUM_201305 +
+              # DUM_201306 +
+              # DUM_201508 +
+              # DUM_201509 +
+              DUM_201805 +
+              I(DUM_202003 + DUM_202004) +
+              I(DUM_202005 + DUM_202006) +
+              DUM_202103 +
+              DUM_202302 +
+              -1, data = tbl)
 summary(model)
 
 model$residuals %>% acf()
@@ -43,15 +55,23 @@ lmtest::dwtest(model)
 forecast::Acf(model$residuals)
 forecast::Pacf(model$residuals)
 forecast::checkresiduals(model)
-summary(model)
-
 
 coef_FCI <- names(model$coefficients)[str_detect(string = names(model$coefficients), pattern = "PC1")]
 
 soma <- sum(model$coefficients[coef_FCI])
 soma
-model$coefficients[coef_FCI] / soma
+z <- model$coefficients[coef_FCI] / soma
+sum(z)
+z
 
+x <- model$residuals
+length(x)
+names(x) <- tbl$Date[-1]
+
+x[which.max(x)]
+x[which.min(x)]
+
+length()
 
 # VAR Model ---------------------------------------------------------------
 
